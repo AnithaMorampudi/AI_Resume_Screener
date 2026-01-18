@@ -1,152 +1,108 @@
-\# 🧠 AI Resume Screener \& Cover Letter Generator  
+# AI Resume Screener
 
+## Overview
+AI Resume Screener is an end-to-end AI-powered application designed to help job seekers and recruiters understand how well a resume matches a job description. Instead of relying only on exact keyword matching, the system uses Natural Language Processing (NLP) to capture semantic similarity, calculate an ATS-style match score, highlight skill gaps, and generate a tailored cover letter.
 
-
-This project brings together AI, data science, and automation to make job applications smarter.  
-
-It helps candidates instantly check how well their resume matches a job description and then auto-generates a personalized cover letter — all in one place.  
-
-
-
-I built it using \*\*Streamlit\*\*, \*\*Python\*\*, and \*\*NLP (Sentence Transformers)\*\* to analyze the meaning of text rather than just keywords.  
-
-The app shows your \*\*ATS (Applicant Tracking System) match score\*\*, highlights \*\*missing skills\*\*, and writes a clean, professional cover letter that fits the job posting.  
-
-
+The goal of this project is to make resume screening more transparent, actionable, and efficient.
 
 ---
 
-
-
-\## 🎥 Live Demo  
-
-
-
-👉 \*\*Try the app here:\*\* \[https://ai-resume-screener-anithamorampudi.streamlit.app](https://ai-resume-screener-anithamorampudi.streamlit.app)  
-
-
-
-\*(The link opens the live Streamlit app — upload your resume and a job description to see it in action!)\*  
-
-
+## What the Application Does
+- Accepts resumes and job descriptions in PDF, DOCX, or TXT formats  
+- Extracts and cleans unstructured text automatically  
+- Calculates an ATS-style match score using semantic similarity  
+- Identifies matched and missing keywords  
+- Generates a role-aware, professional cover letter  
+- Allows users to download the cover letter as a PDF  
+- Provides a simple and interactive web interface built with Streamlit  
 
 ---
 
+## Methods and Technical Approach
 
+### Text Extraction
+The application supports multiple document formats:
+- **PDF** files are parsed using `PyPDF2`
+- **DOCX** files are processed using `docx2txt`
+- **TXT** files are read directly  
 
-\## 🚀 What the App Does  
-
-
-
-\- \*\*ATS Score Check:\*\*  
-
-&nbsp; Compares your resume and job description using semantic similarity to calculate a match percentage.  
-
-
-
-\- \*\*Keyword Insights:\*\*  
-
-&nbsp; Shows which important words, skills, or tools are missing from your resume.  
-
-
-
-\- \*\*AI-Generated Cover Letter:\*\*  
-
-&nbsp; Creates a tailored, human-sounding cover letter you can download as a PDF.  
-
-
-
-\- \*\*Simple, No-Code UI:\*\*  
-
-&nbsp; Just upload your resume and job description — everything else runs automatically.  
-
-
+All documents are converted into plain text for analysis.
 
 ---
 
+### Text Cleaning and Preprocessing
+Extracted text is normalized by:
+- Converting text to lowercase
+- Removing special characters and unnecessary symbols
+- Normalizing whitespace
+- Tokenizing text into meaningful words  
 
-
-\## 🧠 How It Works  
-
-
-
-1\. Upload your \*\*resume\*\* (PDF, DOCX, or TXT).  
-
-2\. Paste or upload the \*\*job description\*\*.  
-
-3\. The app uses the \*\*SentenceTransformer (all-MiniLM-L6-v2)\*\* model to compare text embeddings.  
-
-4\. It returns:  
-
-&nbsp;  - ✅ \*\*ATS match score\*\*  
-
-&nbsp;  - 🧩 \*\*Matched \& missing keywords\*\*  
-
-&nbsp;  - ✉️ \*\*Custom cover letter (PDF)\*\*  
-
-
+This reduces noise while preserving important semantic information.
 
 ---
 
+### Semantic Similarity Using NLP Embeddings
+Instead of basic keyword matching, the system uses a pre-trained **Sentence Transformer model (`all-MiniLM-L6-v2`)** to generate semantic embeddings for both resumes and job descriptions.
 
-
-\## 🛠️ Tech Stack  
-
-
-
-| Category | Tools / Libraries |
-
-|-----------|------------------|
-
-| \*\*Framework\*\* | Streamlit |
-
-| \*\*Language\*\* | Python |
-
-| \*\*NLP Model\*\* | SentenceTransformer (`all-MiniLM-L6-v2`) |
-
-| \*\*File Handling\*\* | PyPDF2, docx2txt |
-
-| \*\*PDF Generation\*\* | fpdf2 |
-
-| \*\*Environment\*\* | Anaconda (Python 3.12) |
-
-
+These embeddings capture contextual meaning, allowing the system to recognize related skills even when different wording is used. Cosine similarity is used to measure alignment between resume and job description content.
 
 ---
 
+### ATS Match Score Calculation
+An ATS-style score is computed by comparing the semantic embeddings of the full resume and job description text.  
+The similarity value is scaled to a percentage (0–100) to give users an intuitive understanding of resume–job fit.
 
+---
 
-\## ⚙️ Setup \& Run Locally  
+### Keyword Matching and Gap Analysis
+To provide actionable insights:
+- Keywords present in both the resume and job description are identified as **matched**
+- Relevant job description keywords missing from the resume are highlighted as **gaps**
 
+This helps users improve resume alignment with ATS systems.
 
+---
+
+### Cover Letter Generation
+The application automatically generates a clean, professional, and role-aware cover letter by:
+- Extracting the job title from the job description
+- Identifying semantically matched and partially matched skills
+- Producing a concise, human-readable letter  
+
+Users can preview the generated cover letter and download it as a PDF.
+
+---
+
+### Interactive Web Interface
+All functionality is delivered through a Streamlit-based interface that allows users to upload files, view ATS scores, analyze keywords, and generate cover letters in a single workflow.
+
+---
+
+## Tech Stack
+- Python  
+- Natural Language Processing (Sentence Transformers)  
+- Machine Learning  
+- Streamlit  
+- PyTorch  
+- PDF and DOCX text extraction libraries  
+
+---
+
+## Demo
+🔗 Live Demo: https://ai-resume-screener.streamlit.app
+
+> **Note:**  
+> The demo is hosted on a free-tier platform. If the application appears inactive or takes a few seconds to load, please refresh the page and allow time for the app to wake up.
+
+---
+
+## If the Demo Is Unavailable
+If the live demo link is temporarily unavailable, the application can be run locally using the instructions below. All features remain fully accessible through local execution.
+
+---
+
+## Running the Project Locally
 
 ```bash
-
-\# Clone this repository
-
-git clone https://github.com/AnithaMorampudi/AI-Resume-Screener.git
-
-cd AI-Resume-Screener
-
-
-
-\# (Optional) Create a virtual environment
-
-conda create -n resume\_screener python=3.12
-
-conda activate resume\_screener
-
-
-
-\# Install dependencies
-
 pip install -r requirements.txt
-
-
-
-\# Run the Streamlit app
-
 streamlit run app.py
-
-
-
