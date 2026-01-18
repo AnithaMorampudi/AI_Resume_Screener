@@ -89,10 +89,10 @@ All functionality is delivered through a Streamlit-based interface that allows u
 ---
 
 ## Demo
-🔗 Live Demo: https://ai-resume-screener.streamlit.app
+🔗 Live Demo: https://ai-resume-screener-anitha.streamlit.app/
 
 > **Note:**  
-> The demo is hosted on a free-tier platform. If the application appears inactive or takes a few seconds to load, please refresh the page and allow time for the app to wake up.
+> The application is hosted on a free-tier platform. If the app appears inactive or takes a few seconds to load, please refresh the page and allow time for it to wake up.
 
 ---
 
