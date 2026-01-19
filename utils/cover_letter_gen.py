@@ -4,130 +4,100 @@ import torch
 from fpdf import FPDF
 from sentence_transformers import SentenceTransformer, util
 
-# Load once globally
+# Load model once
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# -----------------------------------------------
-# Utility: Extract Contact Info
-# -----------------------------------------------
+
 def extract_contact_info(resume_text: str):
-    """Extracts name, email, and phone robustly (handles ALL CAPS)."""
     email = re.search(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", resume_text)
     phone = re.search(r"(\+?\d[\d\s().-]{7,}\d)", resume_text)
 
-    # Split into clean lines
     lines = [l.strip() for l in resume_text.split("\n") if l.strip()]
-
     name = None
-    for line in lines[:8]:  # look at first few lines
-        # Match Firstname Lastname even in all caps
+    for line in lines[:8]:
         if re.match(r"^[A-Z][a-z]+\s+[A-Z][a-z]+$", line) or re.match(r"^[A-Z]+\s+[A-Z]+$", line):
-            name = line.strip().title()
+            name = line.title()
             break
 
-    return (
-        name if name else None,
-        email.group(0) if email else "",
-        phone.group(0) if phone else "",
-    )
+    return name, email.group(0) if email else "", phone.group(0) if phone else ""
 
-# -----------------------------------------------
-# Utility: Extract Job Title
-# -----------------------------------------------
+
 def extract_job_title(jd_text: str):
-    """Extract probable job title."""
     if not jd_text:
         return "the advertised position"
 
     for line in jd_text.split("\n"):
-        if re.search(r"\b(data|ai|ml|software|business|product|analyst|engineer|developer|scientist|manager|intern)\b", line.lower()):
-            clean = re.sub(r"[^A-Za-z\s/&-]", "", line).strip()
+        if re.search(
+            r"\b(data|ai|ml|software|business|product|analyst|engineer|developer|scientist|manager|intern)\b",
+            line.lower(),
+        ):
+            clean = re.sub(r"[^A-Za-z\s/&-]", "", line)
             return " ".join(clean.split()[:5]).title()
+
     return "the advertised position"
 
-# -----------------------------------------------
-# Cover Letter Generator
-# -----------------------------------------------
+
 def generate_cover_letter(resume_text: str, jd_text: str):
-    """Generate polished, role-agnostic, skill-filtered cover letter."""
     if not resume_text or not jd_text:
         return "Please provide both resume and job description text.", None
 
-    # --- Text Cleaning ---
     def clean_text(t):
         t = re.sub(r"[^a-zA-Z0-9\s]", " ", t.lower())
         return re.sub(r"\s+", " ", t).strip()
 
-    resume_clean = clean_text(resume_text)
-    jd_clean = clean_text(jd_text)
-
-    resume_tokens = [t for t in resume_clean.split() if len(t) > 2]
-    jd_tokens = [t for t in jd_clean.split() if len(t) > 2]
-
-    # --- Stopwords & Verb Filtering ---
-    stopwords = set("""
-    is are was were be been being have has had do does did done can will would should could may might must
-    a an the in of on for to from by with this that these those and or as at about into it its your you
-    use using used developed implemented created designed delivered managed analyzed improved applied worked
-    """.split())
+    resume_tokens = clean_text(resume_text).split()
+    jd_tokens = clean_text(jd_text).split()
 
     resume_emb = model.encode(resume_tokens, convert_to_tensor=True)
     jd_emb = model.encode(jd_tokens, convert_to_tensor=True)
     sim_matrix = util.cos_sim(resume_emb, jd_emb)
 
-    matched, missing = set(), set()
-    for i, r_word in enumerate(resume_tokens):
-        if r_word in stopwords:
-            continue
-        max_score = torch.max(sim_matrix[i]).item()
-        if max_score > 0.7:
-            matched.add(r_word)
-        elif 0.5 < max_score <= 0.7:
-            missing.add(r_word)
+    matched = set()
+    for i, word in enumerate(resume_tokens):
+        if torch.max(sim_matrix[i]).item() > 0.7:
+            matched.add(word)
 
-    def is_skill(word):
-        return not re.match(r".*(ing|ed|es|ly|able|ive|ment|ness|tion)$", word)
+    matched_text = ", ".join(sorted(list(matched)[:10])) or "data analysis and reporting"
 
-    matched = [w for w in matched if is_skill(w)]
-    missing = [w for w in missing if is_skill(w)]
-
-    matched_text = ", ".join(sorted(list(matched)[:10])) or "data analysis, visualization, and reporting"
-    missing_text = ", ".join(sorted(list(missing)[:6])) or "emerging technologies and automation"
-
-    # --- Info Extraction ---
     name, email, phone = extract_contact_info(resume_text)
     job_title = extract_job_title(jd_text)
 
-    # --- Letter Body ---
     text = f"""Dear Hiring Manager,
 
-I am writing to express my interest in the {job_title} role. My experience and skill set align well with the qualifications described in the posting.
+I am writing to express my interest in the {job_title} role. With a strong passion for using data, analytics, and technology to drive meaningful insights, I am excited about the opportunity to contribute to your team and support data-driven decision-making.
 
-Throughout my professional journey, I have developed strengths in {matched_text}, which have enabled me to drive measurable results, streamline workflows, and deliver data-driven outcomes. I am also eager to broaden my expertise in {missing_text}, continually adapting to new technologies and business needs.
+I bring hands-on experience in {matched_text}, which I have applied across academic projects and practical problem-solving scenarios. My work has involved analyzing structured and unstructured data, building logical workflows, and transforming raw information into clear, actionable insights that support business and operational goals.
 
-I take pride in my analytical thinking, adaptability, and commitment to excellence. I am confident that my technical foundation and collaborative mindset would make me a valuable addition to your team.
+In addition to my technical capabilities, I offer strong analytical thinking, problem-solving skills, and attention to detail. I am comfortable working independently as well as collaborating with cross-functional teams, and I take pride in communicating complex ideas in a clear and concise manner to both technical and non-technical stakeholders.
 
-Thank you for your time and consideration. I look forward to the opportunity to discuss how my background can add value to your organization.
+I am continuously motivated to expand my skill set and stay current with evolving tools and methodologies. I actively seek opportunities to improve efficiency, automate repetitive processes, and deliver high-quality results under deadlines. I value feedback, adaptability, and accountability, and I approach every task with a strong sense of ownership.
+
+What particularly draws me to this opportunity is the chance to contribute in a role like {job_title}, where analytical rigor, curiosity, and impact are highly valued. I am confident that my technical foundation, strong work ethic, and eagerness to learn would allow me to make meaningful contributions to your organization.
+
+Thank you for your time and consideration. I would welcome the opportunity to discuss how my background, skills, and interests align with your team’s goals and how I can contribute to your continued success.
 """
 
-    # --- Smart signature ---
+
     if name:
         text += f"\nSincerely,\n{name}"
-    else:
-        text += "\nSincerely,\n"
 
-    contact_line = " | ".join(filter(None, [email, phone]))
-    if contact_line:
-        text += f"\n{contact_line}"
+    if email or phone:
+        text += f"\n{email} {phone}"
 
-    # --- PDF Output ---
+    # ---- PDF generation ----
+    def sanitize_text(t):
+        t = re.sub(r"[^\x00-\x7F]+", " ", t)
+        t = re.sub(r"(\S{60,})", lambda m: m.group(1)[:60] + " ", t)
+        return t
+
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Helvetica", size=12)
-    safe_text = re.sub(r"[^\x00-\x7F]+", " ", text)
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.set_font("Helvetica", size=11)
 
+    safe_text = sanitize_text(text)
     for line in safe_text.split("\n"):
-        pdf.multi_cell(w=190, h=8, txt=line.strip(), align="L")
+        pdf.multi_cell(180, 7, line)
 
     pdf_bytes = bytes(pdf.output(dest="S"))
     pdf_buffer = io.BytesIO(pdf_bytes)
