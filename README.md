@@ -7,6 +7,22 @@ The goal of this project is to make resume screening more transparent, actionabl
 
 ---
 
+## 📸 Application Screenshots
+
+### Applicant View
+Upload resumes and job descriptions to receive an ATS match score along with keyword insights.
+
+![Applicant View](assets/applicant_view.png)
+
+---
+
+### Cover Letter Generator
+Automatically generate a professional, ATS-friendly cover letter and download it as a PDF.
+
+![Cover Letter Generator](assets/cover_letter_generator.png)
+
+---
+
 ## What the Application Does
 - Accepts resumes and job descriptions in PDF, DOCX, or TXT formats  
 - Extracts and cleans unstructured text automatically  
